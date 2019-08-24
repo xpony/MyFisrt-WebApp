@@ -3,10 +3,9 @@
 
 __author__ = 'xpony'
 
+#编写一个orm框架来处理数据库的增删改查
 import asyncio, logging
 import aiomysql
-
-#编写一个orm框架来处理数据库的增删改查
 
 def log(sql, args=()): #打印日志函数
 	logging.info('SQL:%s' % sql)

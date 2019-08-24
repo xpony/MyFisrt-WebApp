@@ -3,9 +3,9 @@
 
 __author__ = 'xpony'
 
+#编写 user, blog, comment三个model
 import time, uuid
 from orm import Model, StringField, BooleanField, TextField, FloatField
-#编写 user, blog, comment三个model
 
 def next_id():
 	return '%015d%s000' % (int(time.time() * 1000), uuid.uuid4().hex) #用时间戳和UUID4(基于随机数)生成唯一ID
@@ -34,7 +34,7 @@ class Blog(Model):
 	create_at = FloatField(default=time.time)
 
 class Comment(Model):
-	__table__ = 'contents'
+	__table__ = 'comments'
 
 	id = StringField(primary_key=True, default=next_id, ddl='varchar(50)')
 	blog_id = StringField(ddl='varchar(50)')
@@ -47,13 +47,16 @@ class Comment(Model):
 
 
 #####测试User信息插入数据库 ==> 成功插入！
+#####测试Blog信息插入数据库 ==> 成功插入！
 # import orm
 # import asyncio
 
 # async def test(loop):
 #     await orm.create_pool(loop, user='root', password='root123', db='webapp')
-#     u = User(name='xpony', email='xpony.red@gmail', passwd='mayizhao1997', image='about:blank')
-#     await u.save()
+#     summary = 'Lorem ipsum dolor sit amet hahahahahahahahahaha'
+#     b = Blog(name='Test Blog', user_id=113 , summary=summary,user_name='xpony', user_image='12', content='我爱你啊')
+    # u = User(name='xpony', email='xpony.red@gmail', passwd='mayizhao1997', image='about:blank')
+#     await b.save()
 
 # loop = asyncio.get_event_loop()
 # loop.run_until_complete(test(loop))
