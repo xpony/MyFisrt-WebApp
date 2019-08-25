@@ -11,6 +11,8 @@ from aiohttp import web
 from jinja2 import Environment, FileSystemLoader
 import orm
 from coroweb import add_routes, add_static
+from config import configs
+from handlers import cookie2user, COOKIE_NAME
 
 def init_jinja2(app, **kw): #加入jinja2的自主注册
 	logging.info('init jinja2……')
@@ -53,11 +55,27 @@ async def data_factory(app, handler):
 		return (await handler(request))
 	return parse_data
 
+#解析cookie 并将登录用户绑定到request对象上
+async def auth_factory(app, handler):
+	async def auth(request):
+		logging.info('check user:%s %s' % (request.method, request.path))
+		request.__user__ = None
+		cookie_str = request.cookies.get(COOKIE_NAME)
+		if cookie_str:
+			user = await cookie2user(cookie_str)
+			if user:
+				logging.info('set current user: %s' % user.name)
+				request.__user__ = user
+		if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
+			return web.HTTPFound('/signin')
+		return (await handler(request))
+	return auth
+
 #把返回值转换成web.Response对象
 async def response_factory(app, handler):
 	async def response(request):
 		logging.info('Response handler……')
-		r = await handler(request)     #响应的内容形式  handle就是url函数
+		r = await handler(request)     #响应的内容赋给r  handle就是url函数
 		if isinstance(r, web.StreamResponse):
 			return r
 		if isinstance(r, bytes):
@@ -77,6 +95,7 @@ async def response_factory(app, handler):
 				resp.content_type = 'application/json; charset=utf-8'
 				return resp
 			else:
+				r['__user__'] = request.__user__ #需要将用户登录信息绑定到响应对象上
 				resp = web.Response(body=app['__templating__'].get_template(template).render(**r).encode('utf-8'))
 				resp.content_type = 'text/html;charset=utf-8'
 				return resp
@@ -113,7 +132,7 @@ async def init(loop):
 	await orm.create_pool(loop, user='root', password='root123', db='webapp')
 	#生成app对象   并且添加了个中间件 middleware是一种拦截器
 	app = web.Application(loop=loop, middlewares=[
-		logger_factory, response_factory
+		logger_factory, auth_factory, response_factory 
 	]) 
 	init_jinja2(app, filters=dict(datetime=datetime_filter)) #加入jinja2的自主注册 过滤器添加进去
 	add_routes(app, 'handlers') #在coroweb.py  自动扫描handles模块，把符合的url添加进路由

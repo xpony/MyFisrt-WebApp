@@ -48,15 +48,15 @@ class Comment(Model):
 
 #####测试User信息插入数据库 ==> 成功插入！
 #####测试Blog信息插入数据库 ==> 成功插入！
-# import orm
-# import asyncio
+import orm
+import asyncio
 
 # async def test(loop):
 #     await orm.create_pool(loop, user='root', password='root123', db='webapp')
 #     summary = 'Lorem ipsum dolor sit amet hahahahahahahahahaha'
-#     b = Blog(name='Test Blog', user_id=113 , summary=summary,user_name='xpony', user_image='12', content='我爱你啊')
-    # u = User(name='xpony', email='xpony.red@gmail', passwd='mayizhao1997', image='about:blank')
-#     await b.save()
+    # b = Blog(name='Test Blog', user_id=113 , summary=summary,user_name='xpony', user_image='12', content='我爱你啊')
+#     u = User(name='wowowowowo', email='xffasdfd@qqqq.com', passwd='fadfa123sdf', image='about:blank')
+#     await u.save()
 
 # loop = asyncio.get_event_loop()
 # loop.run_until_complete(test(loop))

@@ -30,10 +30,9 @@ async def create_pool(loop, **kw):
 #查询数据库
 async def select(sql, args, size=None): #传入带参的sql,防止sql注入
 	log(sql, args)
-	global __pool
 	async with __pool.get() as conn: #通过连接池创建一个连接
 		async with conn.cursor(aiomysql.DictCursor) as cur: #创建游标
-			await cur.execute(sql.replace('?', '%'), args or ()) #执行sql语句
+			await cur.execute(sql.replace('?', '%s'), args or ()) #执行sql语句
 			if size:
 				rs = await cur.fetchmany(size)
 			else:
@@ -50,8 +49,10 @@ async def execute(sql, args, autocommit=True):
 			await conn.begin()
 		try:
 			async with conn.cursor(aiomysql.DictCursor) as cur:
+				print(args)
 				await cur.execute(sql.replace('?', '%s'), args)
 				affected = cur.rowcount #返回结果数，比如插入了1行
+				logging.info('affected------: %s' % affected)
 			if not autocommit:
 				await conn.commit()
 		except BaseException as e:
@@ -172,7 +173,7 @@ class Model(dict, metaclass=ModelMetaclass):
 			args = []
 		orderBy = kw.get('orderBy', None)
 		if orderBy:
-			sql.append('orderBy')
+			sql.append('order By')
 			sql.append(orderBy)
 		limit = kw.get('limit', None)
 		if limit is not None:
@@ -181,7 +182,7 @@ class Model(dict, metaclass=ModelMetaclass):
 				sql.append('?')
 				args.append(limit)
 			elif isinstance(limit, tuple) and len(limit) == 2:
-				sql.append('?,?')
+				sql.append('?, ?')
 				args.extend(limit)
 			else:
 				raise ValueError('Invalid limit value: %s' % str(limit))

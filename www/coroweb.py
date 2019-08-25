@@ -7,7 +7,7 @@ __author__ = 'xpony'
 import asyncio, os, inspect, logging, functools
 from urllib import parse
 from aiohttp import web
-# from apis import APIError # 这是个自己编写的模块
+from apis import APIError # 这是个自己编写的模块
 
 #两个装饰器，使用装饰器的函数会增加两个属性
 def get(path): #一个函数通过get装饰会附带url信息，类型是GET

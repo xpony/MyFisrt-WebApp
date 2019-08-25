@@ -14,7 +14,7 @@ class Dict(dict):
 	def __init__(self, names=(), values=(), **kw):
 		super().__init__(**kw)
 		for k, v in zip(names, values):#返回对应元素组成tuple的List
-			self.[k] = v
+			self[k] = v
 
 	def __getattr__(self, key):
 		try:
@@ -40,7 +40,7 @@ def merge(defaults, override):
 def toDict(d):
 	D = Dict()
 	for k, v in d.items():
-		D[K] = toDict(V) if isinstance(v, dict) else v
+		D[k] = toDict(v) if isinstance(v, dict) else v
 	return D 
 
 configs = config_default.configs
