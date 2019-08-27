@@ -11,15 +11,33 @@ from models import User, Comment, Blog, next_id
 from aiohttp import web
 from apis import APIValueError, APIResourceNotFoundError, APIError, APIPermissionError
 from config import configs
+import markdown2
+from apis import Page
 
 #设置cookie
 COOKIE_NAME = 'xponysession'
 _COOKIE_KEY = configs.session.secret
 
-#检查reques对象是否有user属性 blog api要使用
+#检查reques对象是否有user属性 创建日志的api使用
 def check_admin(request):
 	if request.__user__ is None or not request.__user__.admin:
 		return APIPermissionError()
+
+#确认页数信息 日志分页api使用
+def get_page_index(page_str):
+	p = 1
+	try:
+		p = int(page_str)
+	except Exception as e:
+		pass
+	if p < 1:
+		p = 1
+	return p 
+
+#将text文本转换成html  单篇访问日志的api使用
+def text2html(text):
+	lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'), filter(lambda s: s.strip() != '', text.split('\n')))
+	return ''.join(lines)
 
 # 计算加密cookie:
 def user2cookie(user, max_age): #把用户信息变成cookie用的字符串
@@ -62,19 +80,22 @@ async def cookie2user(cookie_str):
 # 	}
 
 @get('/') #首页
-async def index(request):
-    summary = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-    blogs = [
-        Blog(id='1', name='Test Blog', summary=summary, created_at=1566616682.698303),
-        Blog(id='2', name='Something New', summary=summary, created_at=time.time()-3600),
-        Blog(id='3', name='Learn Swift', summary=summary, created_at=time.time()-7200)
-    ]
-    return {
-        '__template__': 'blogs.html',
-        'blogs': blogs
-    }
+async def index(*, page='1'): #路径上的参数是通过coroweb.py里的RequestHandler(）捕获之后传到url函数里的
+	page_index = get_page_index(page)
+	num = await Blog.findNumber('count(id)')
+	page = Page(num, page_index=page_index) ##这里必须把新的page_index传进去！否则翻页功能有问题。
+	if num == 0:
+		blogs = []
+	else:
+		blogs = await Blog.findAll(orderBy='create_at desc', limit=(page.offset, page.limit))
+	return {
+		'__template__': 'blogs.html',
+		'page': page,
+		'blogs': blogs
+	}
 
-@get('/register')  #用户注册页
+#用户注册页
+@get('/register')  
 async def register():
 	return {
 		'__template__': 'register.html'
@@ -159,7 +180,7 @@ async def manage_create_blog():
 	return {
 		'__template__': 'manage_blog_edit.html',
 		'id': '',
-		'action': '/api/blogs'
+		'action': '/api/blogs',
 	}
 
 #创建日志的api 日志信息提到到这里，通过这里来提交到数据库
@@ -176,3 +197,82 @@ async def api_create_blog(request, *, name, summary, content):
 	await blog.save()
 	return blog
 
+#日志分页显示的api
+@get('/api/blogs')
+async def api_blogs(*, page='1'):
+	page_index = get_page_index(page)
+	num = await Blog.findNumber('count(id)')
+	p = Page(num, page_index)
+	if num == 0:
+		return dict(page=p, blogs=())
+	blogs = await Blog.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
+	return dict(page=p, blogs=blogs)
+
+#日志管理页
+@get('/manage/blogs')
+async def manage_blogs(*, page='1'):
+	page_index = get_page_index(page)
+	num = await Blog.findNumber('count(id)')
+	page = Page(num, page_index=page_index) ##这里必须把新的page_index传进去！否则翻页功能有问题。
+	if num == 0:
+		blogs = []
+	else:
+		blogs = await Blog.findAll(orderBy='create_at desc', limit=(page.offset, page.limit))
+	return {
+		'__template__': 'manage_blogs.html',
+		'page_index': get_page_index(page),
+		# 'page': page,
+		# 'blogs': blogs
+	}	
+
+#谋篇日志访问页  返回日志和其评论
+@get('/blog/{id}')
+async def get_blog(id):
+	blog = await Blog.find(id)
+	comments = await Comment.findAll('blog_id=?', [id], orderBy='create_at desc')
+	for c in comments:
+		c.html_content = text2html(c.content)
+	blog.html_content = markdown2.markdown(blog.content)
+	return {
+		'__template__': 'blog.html',
+		'blog': blog,
+		'comments': comments
+	}
+
+#获取谋篇日志的api
+@get('/api/blogs/{id}')
+async def api_get_blog(*, id):
+	blog = await Blog.find(id)
+	return blog
+
+#删除谋篇日志
+@post('/api/blogs/{id}/delete')
+async def api_delete_blog(request, *, id):
+	check_admin(request)
+	blog = await Blog.find(id)
+	await blog.remove()
+	return dict(id=id)
+
+#修改谋篇日志
+@get('/manage/blogs/edit')
+def manage_edit_blog(*, id):
+    return {
+        '__template__': 'manage_blog_edit.html',
+        'id': id,
+        'action': '/api/blogs/%s' % id
+    }
+
+#添加评论的api
+@post('/api/blogs/{id}/comments')
+async def api_create_comment(id, request, *, content):
+    user = request.__user__
+    if user is None:
+        raise APIPermissionError('Please signin first.')
+    if not content or not content.strip():
+        raise APIValueError('content')
+    blog = await Blog.find(id)
+    if blog is None:
+        raise APIResourceNotFoundError('Blog')
+    comment = Comment(blog_id=blog.id, user_id=user.id, user_name=user.name, user_image=user.image, content=content.strip())
+    await comment.save()
+    return comment
