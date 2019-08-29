@@ -2,13 +2,13 @@
 {% macro pagination(url, page) %}
     <ul class="uk-pagination">
         {% if page.has_previous %}
-            <li><a href="{{ url }}{{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+            <li><a href="{{ url }}{{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"> 上一页</i></a></li>
         {% else %}
             <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
         {% endif %}
             <li class="uk-active"><span>{{ page.page_index }}</span></li>
         {% if page.has_next %}
-            <li><a href="{{ url }}{{ page.page_index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+            <li><a href="{{ url }}{{ page.page_index + 1 }}">下一页 <i class="uk-icon-angle-double-right"></i></a></li>
         {% else %}
             <li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
         {% endif %}
@@ -45,15 +45,14 @@
             <div class="uk-navbar-flip">
                 <ul class="uk-navbar-nav">
                 {% if __user__ %}
-                    <li class="uk-parent" data-uk-dropdown>
+                    <li class="uk-parent"  data-uk-dropdown="{pos:'right-top'}">
                         <a href="#0"><i class="uk-icon-user"></i> {{ __user__.name }}</a>
-                        <div class="uk-dropdown uk-dropdown-navbar">
+                        <div class="uk-dropdown uk-dropdown-navbar" style="width: 107px">
                             <ul class="uk-nav uk-nav-navbar">
                                 {% if __user__.admin %}
-                                    <li><a href="/manage/blogs"><i class="uk-icon-sign-out"></i>日志管理</a></li>
+                                    <li><a href="/manage/blogs"><i class="uk-icon-folder-open"></i> 日志管理</a></li>
                                 {% endif %}
-                                <li><a href="/signout"><i class="uk-icon-sign-out"></i>登出</a></li>
-                                
+                                <li><a href="/signout"><i class="uk-icon-sign-out"></i> 登出</a></li>
                             </ul>
                         </div>
                     </li>
@@ -66,13 +65,13 @@
         </div>
     </nav>
 
-    <div class="uk-container uk-container-center">
-        <div class="uk-grid">
+    <div class="uk-container uk-container-center" >
+        <div class="uk-grid" style="border-top: 20px solid white">
             {% block content %}
             {% endblock %}  
         </div>
     </div>
-
+<!-- 
     <div class="uk-margin-large-top" style="background-color:#eee; border-top:1px solid #ccc;">
         <div class="uk-container uk-container-center uk-text-center">
             <div class="uk-panel uk-margin-top uk-margin-bottom">
@@ -87,7 +86,7 @@
             </div>
 
         </div>
-    </div>
+    </div> -->
     <!-- <script src="/static/js/canvas-nest.js"></script> -->
 </body>
 </html>

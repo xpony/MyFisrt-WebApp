@@ -9,7 +9,7 @@
 
 {% block content %}
 
-    <div class="uk-width-medium-3-4">
+    <div class="uk-width-medium-3-4 " >
     {% for blog in blogs %}
         <article class="uk-article">
             <h2 style="color: #0066CC">{{ blog.name }}</h2>
@@ -19,8 +19,12 @@
         </article>
         <hr class="uk-article-divider">
     {% endfor %}
-    {{ pagination('/?page=', page) }}
+        <div>
+            {{ pagination('/?page=', page) }}
+        </div>
+    
     </div>
+
 
     <div class="uk-width-medium-1-4">
         <div class="uk-panel uk-panel-header">
