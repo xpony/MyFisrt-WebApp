@@ -38,8 +38,8 @@
         <div class="uk-container uk-container-center">
             <a href="/" class="uk-navbar-brand">Xpony</a>
             <ul class="uk-navbar-nav">
-                <li data-url="blogs"><a href="/"><i class="uk-icon-home"></i> 日志</a></li>
-                <li><a href=""><i class="uk-icon-book"></i> 摄影</a></li>
+                <li data-url="blogs"><a href="/"><i class="uk-icon-book"></i> 文章</a></li>
+                <li><a href=""><i class="uk-icon-camera"></i> 摄影</a></li>
                 <li><a target="_blank" href="https://github.com/xpony"><i class="uk-icon-code"></i> 编程</a></li>
             </ul>
             <div class="uk-navbar-flip">
@@ -50,9 +50,9 @@
                         <div class="uk-dropdown uk-dropdown-navbar" style="width: 107px">
                             <ul class="uk-nav uk-nav-navbar">
                                 {% if __user__.admin %}
-                                    <li><a href="/manage/blogs"><i class="uk-icon-folder-open"></i> 日志管理</a></li>
+                                    <li><a href="/manage/blogs"><i class="uk-icon-folder-open"></i> 文章管理</a></li>
                                 {% endif %}
-                                <li><a href="/signout"><i class="uk-icon-sign-out"></i> 登出</a></li>
+                                <li><a href="/signout"><i class="uk-icon-sign-out"></i> 退出登录</a></li>
                             </ul>
                         </div>
                     </li>

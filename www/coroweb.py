@@ -105,8 +105,6 @@ class RequestHandler(object):
 					kw = dict()
 					for k, v in parse.parse_qs(qs, True).items(): #循环出url中的参数
 						kw[k] = v[0]
-					print(99999999999999999)
-					print(kw)
 		if kw is None:
 			kw = dict(**request.match_info) #路径参数
 		else:

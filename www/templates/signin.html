@@ -26,11 +26,20 @@ $(function() {
                     email = this.email.trim().toLowerCase(),
                     data = {
                         email: email,
-                        passwd: this.passwd==='' ? '' : CryptoJS.SHA1(email + ':' + this.passwd).toString()
+                        passwd: this.passwd === '' ? '' : CryptoJS.SHA1(email + ':' + this.passwd).toString()
                     };
+                if (! this.email.trim()) {
+                    return $form.showFormError('请输入电子邮箱！');
+                }
+                if (! this.passwd.trim()) {
+                    return $form.showFormError('请输入密码！');
+                }
                 $form.postJSON('/api/authenticate', data, function(err, result) {
                     if (! err) {
                         location.assign('/');
+                    }
+                    if (err) {
+                    return $form.showFormError('邮箱或者密码不正确！');
                     }
                 });
             }
@@ -48,7 +57,7 @@ $(function() {
                 <div class="uk-form-row">
                     <div class="uk-form-icon uk-width-1-1">
                         <i class="uk-icon-envelope-o"></i>
-                        <input v-model="email" name="email" type="text" placeholder="电子邮件" maxlength="50" class="uk-width-1-1 uk-form-large">
+                        <input v-model="email" name="email" type="text" placeholder="电子邮箱" maxlength="50" class="uk-width-1-1 uk-form-large">
                     </div>
                 </div>
                 <div class="uk-form-row">

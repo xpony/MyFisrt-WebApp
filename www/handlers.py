@@ -12,7 +12,7 @@ from aiohttp import web
 from apis import APIValueError, APIResourceNotFoundError, APIError, APIPermissionError
 from config import configs
 import markdown2
-from apis import Page
+from apis import Page, Page2
 
 #设置cookie
 COOKIE_NAME = 'xponysession'
@@ -98,7 +98,7 @@ async def index(*, page='1'): #路径上的参数是通过coroweb.py里的Reques
 @get('/register')  
 async def register():
 	return {
-		'__template__': 'register.html'
+		'__template__': 'register.html',
 	}
 
 # @get('/api/users') #测试
@@ -174,6 +174,35 @@ async def signout(request):
 	logging.info('user signed out.')
 	return r
 
+#用户管理页
+@get('/manage/users')
+async def manage_users(*, page='1'):
+    return {
+        '__template__': 'manage_users.html',
+        'page_index': get_page_index(page)
+    }
+
+#用户信息获取api
+@get('/api/users')
+async def api_get_users(*, page='1'):
+    page_index = get_page_index(page)
+    num = await User.findNumber('count(id)')
+    p = Page2(num, page_index)
+    if num == 0: 
+        return dict(page=p, users=())
+    users = await User.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
+    for u in users:
+        u.passwd = '******'
+    return dict(page=p, users=users)
+
+#删除某个用户
+@post('/api/users/{id}/delete')
+async def api_delete_user(request, *, id):
+	check_admin(request)
+	user= await User.find(id)
+	await user.remove()
+	return dict(id=id)
+
 #日志创建页
 @get('/manage/blogs/create')
 async def manage_create_blog():
@@ -202,7 +231,7 @@ async def api_create_blog(request, *, name, summary, content):
 async def api_blogs(*, page='1'):
 	page_index = get_page_index(page)
 	num = await Blog.findNumber('count(id)')
-	p = Page(num, page_index)
+	p = Page2(num, page_index) # 新改个Page类，为了拿到所有blog,因为管理页的分页有问题
 	if num == 0:
 		return dict(page=p, blogs=())
 	blogs = await Blog.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
@@ -211,18 +240,9 @@ async def api_blogs(*, page='1'):
 #日志管理页
 @get('/manage/blogs')
 async def manage_blogs(*, page='1'):
-	page_index = get_page_index(page)
-	num = await Blog.findNumber('count(id)')
-	page = Page(num, page_index=page_index) ##这里必须把新的page_index传进去！否则翻页功能有问题。
-	if num == 0:
-		blogs = []
-	else:
-		blogs = await Blog.findAll(orderBy='create_at desc', limit=(page.offset, page.limit))
 	return {
 		'__template__': 'manage_blogs.html',
-		'page_index': get_page_index(page),
-		# 'page': page,
-		# 'blogs': blogs
+		'page_index': get_page_index(page)
 	}	
 
 #谋篇日志访问页  返回日志和其评论
@@ -253,14 +273,31 @@ async def api_delete_blog(request, *, id):
 	await blog.remove()
 	return dict(id=id)
 
-#修改谋篇日志
+#修改谋篇日志页
 @get('/manage/blogs/edit')
-def manage_edit_blog(*, id):
+async def manage_edit_blog(*, id):
     return {
         '__template__': 'manage_blog_edit.html',
         'id': id,
         'action': '/api/blogs/%s' % id
     }
+
+#修改谋篇日志的api， 更新日志内容
+@post('/api/blogs/{id}')
+async def api_update_blog(id, request, *, name, summary, content):
+    check_admin(request)
+    blog = await Blog.find(id)
+    if not name or not name.strip():
+        raise APIValueError('name', 'name cannot be empty.')
+    if not summary or not summary.strip():
+        raise APIValueError('summary', 'summary cannot be empty.')
+    if not content or not content.strip():
+        raise APIValueError('content', 'content cannot be empty.')
+    blog.name = name.strip()
+    blog.summary = summary.strip()
+    blog.content = content.strip()
+    await blog.update()
+    return blog
 
 #添加评论的api
 @post('/api/blogs/{id}/comments')
@@ -276,3 +313,30 @@ async def api_create_comment(id, request, *, content):
     comment = Comment(blog_id=blog.id, user_id=user.id, user_name=user.name, user_image=user.image, content=content.strip())
     await comment.save()
     return comment
+
+#评论管理页
+@get('/manage/comments')
+def manage_comments(*, page='1'):
+    return {
+        '__template__': 'manage_comments.html',
+        'page_index': get_page_index(page)
+    }
+
+#评论信息获取api
+@get('/api/comments')
+async def api_comments(*, page='1'):
+    page_index = get_page_index(page)
+    num = await Comment.findNumber('count(id)')
+    p = Page2(num, page_index)
+    if num == 0:
+        return dict(page=p, comments=())
+    comments = await Comment.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, comments=comments)
+
+#删除某条评论
+@post('/api/comments/{id}/delete')
+async def api_delete_comment(request, *, id):
+	check_admin(request)
+	comment= await Comment.find(id)
+	await comment.remove()
+	return dict(id=id)

@@ -61,9 +61,11 @@ $(function () {
 
         <hr class="uk-article-divider">
     {% endif %}
-
-        <h3>最新评论</h3>
-
+        {% if __user__ %}
+            <h3><b>最新评论</b></h3>
+        {% else %}
+            <h3><b>最新评论</b><span style="font-size: 15px; color: #a8b0a7"> (登录后即可发表评论吆)</span></h3>
+        {% endif %}
         <ul class="uk-comment-list">
             {% for comment in comments %}
             <li>
@@ -73,13 +75,13 @@ $(function () {
                         <h4 class="uk-comment-title">{{ comment.user_name }} {% if comment.user_id==blog.user_id %}(作者){% endif %}</h4>
                         <p class="uk-comment-meta">{{ comment.create_at|datetime }}</p>
                     </header>
-                    <div class="uk-comment-body">
+                    <div class="uk-comment-body" style="margin-bottom: 15px">
                         {{ comment.html_content|safe }}
                     </div>
                 </article>
             </li>
             {% else %}
-            <p>还没有人评论...</p>
+            <p> 还没有人评论 ...</p>
             {% endfor %}
         </ul>
 

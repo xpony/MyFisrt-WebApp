@@ -16,12 +16,24 @@ function initVM(blog) {
             submit: function (event) {
                 event.preventDefault();
                 var $form = $('#vm').find('form');
+                if (! this.name.trim()) {
+                    return $form.showFormError('标题不能为空！');
+                }
+                if (this.name.length > 20) {
+                    return $form.showFormError('标题字数不能超过20字哦');
+                }
+                if (this.summary.length > 180) {
+                    return $form.showFormError('摘要字数不能超过180个字哦');
+                }
+                if (! this.content.trim()) {
+                    return $form.showFormError('内容不能为空！');
+                }
                 $form.postJSON(action, this.$data, function (err, r) {
                     if (err) {
                         $form.showFormError(err);
                     }
                     else {
-                        return location.assign('/api/blogs/' + r.id);
+                        return location.assign('/');
                     }
                 });
             }
