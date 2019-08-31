@@ -243,7 +243,7 @@ $(function () {
                         $('html,body').animate({ scrollTop: $alert.offset().top - 60 });
                     }
                     if (fieldName) {
-                        $form.find('[name=' + fieldName + ']').addClass('uk-form-danger');
+                        $form.find('[name=' + fieldName + ']').addClass('uk-alert');
                     }
                 }
                 else {

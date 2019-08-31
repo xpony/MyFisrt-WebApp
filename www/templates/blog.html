@@ -15,6 +15,9 @@ $(function () {
         if (content==='') {
             return $form.showFormError('请输入评论内容！');
         }
+        if (content.length > 300) {
+            return $form.showFormError('评论内容不能超过300字哦！');
+        }
         $form.postJSON(comment_url, { content: content }, function (err, result) {
             if (err) {
                 return $form.showFormError(err);
@@ -31,7 +34,7 @@ $(function () {
 
     <div class="uk-width-medium-3-4">
         <article class="uk-article">
-            <h2 style="text-align: center;">{{ blog.name }}</h2>
+            <h2 style="text-align: center;"><b>{{ blog.name }}</b></h2>
             <p class="uk-article-meta">发表于{{ blog.create_at|datetime }}</p>
             <p>{{ blog.html_content|safe }}</p>
         </article>
@@ -94,6 +97,7 @@ $(function () {
                 <h3>{{ blog.user_name }}</h3>
             </div>
         </div>
+        <h4 style="text-align: center; margin-top: 10px"><b>作者</b></h4>
         <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
             <ul class="uk-list uk-list-line">
