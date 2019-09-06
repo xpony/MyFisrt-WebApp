@@ -9,7 +9,7 @@ JSON API definition.
 
 import json, logging, inspect, functools
 
-#储存日志分页信息
+#储存文章分页信息
 class Page(object):
 
     def __init__(self, item_count, page_index=1, page_size=6):
@@ -34,7 +34,7 @@ class Page(object):
     __repr__ = __str___
 
 
-#日志管理页的分页调整不出来，直接全部拿出来算了
+#文章管理页的分页调整不出来，直接全部拿出来算了
 class Page2(object):
 
     def __init__(self, item_count, page_index=1, page_size=500):

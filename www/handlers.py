@@ -18,12 +18,12 @@ from apis import Page, Page2
 COOKIE_NAME = 'xponysession'
 _COOKIE_KEY = configs.session.secret
 
-#检查reques对象是否有user属性 创建日志的api使用
+#检查reques对象是否有user属性 创建文章的api使用
 def check_admin(request):
 	if request.__user__ is None or not request.__user__.admin:
 		return APIPermissionError()
 
-#确认页数信息 日志分页api使用
+#确认页数信息 文章分页api使用
 def get_page_index(page_str):
 	p = 1
 	try:
@@ -34,7 +34,7 @@ def get_page_index(page_str):
 		p = 1
 	return p 
 
-#将text文本转换成html  单篇访问日志的api使用
+#将text文本转换成html  单篇访问文章的api使用
 def text2html(text):
 	lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'), filter(lambda s: s.strip() != '', text.split('\n')))
 	return ''.join(lines)
@@ -203,7 +203,7 @@ async def api_delete_user(request, *, id):
 	await user.remove()
 	return dict(id=id)
 
-#日志创建页
+#文章创建页
 @get('/manage/blogs/create')
 async def manage_create_blog():
 	return {
@@ -212,7 +212,7 @@ async def manage_create_blog():
 		'action': '/api/blogs',
 	}
 
-#创建日志的api 日志信息提到到这里，通过这里来提交到数据库
+#创建文章的api 文章信息提到到这里，通过这里来提交到数据库
 @post('/api/blogs')
 async def api_create_blog(request, *, name, summary, content):
 	check_admin(request) #检查request对象身上是否绑定了user
@@ -226,7 +226,7 @@ async def api_create_blog(request, *, name, summary, content):
 	await blog.save()
 	return blog
 
-#日志分页显示的api
+#文章分页显示的api
 @get('/api/blogs')
 async def api_blogs(*, page='1'):
 	page_index = get_page_index(page)
@@ -237,7 +237,7 @@ async def api_blogs(*, page='1'):
 	blogs = await Blog.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
 	return dict(page=p, blogs=blogs)
 
-#日志管理页
+#文章管理页
 @get('/manage/blogs')
 async def manage_blogs(*, page='1'):
 	return {
@@ -245,7 +245,7 @@ async def manage_blogs(*, page='1'):
 		'page_index': get_page_index(page)
 	}	
 
-#谋篇日志访问页  返回日志和其评论
+#谋篇文章访问页  返回文章和其评论
 @get('/blog/{id}')
 async def get_blog(id):
 	blog = await Blog.find(id)
@@ -259,13 +259,13 @@ async def get_blog(id):
 		'comments': comments
 	}
 
-#获取谋篇日志的api
+#获取谋篇文章的api
 @get('/api/blogs/{id}')
 async def api_get_blog(*, id):
 	blog = await Blog.find(id)
 	return blog
 
-#删除谋篇日志
+#删除谋篇文章
 @post('/api/blogs/{id}/delete')
 async def api_delete_blog(request, *, id):
 	check_admin(request)
@@ -273,7 +273,7 @@ async def api_delete_blog(request, *, id):
 	await blog.remove()
 	return dict(id=id)
 
-#修改谋篇日志页
+#修改谋篇文章页
 @get('/manage/blogs/edit')
 async def manage_edit_blog(*, id):
     return {
@@ -282,7 +282,7 @@ async def manage_edit_blog(*, id):
         'action': '/api/blogs/%s' % id
     }
 
-#修改谋篇日志的api， 更新日志内容
+#修改谋篇文章的api， 更新文章内容
 @post('/api/blogs/{id}')
 async def api_update_blog(id, request, *, name, summary, content):
     check_admin(request)
