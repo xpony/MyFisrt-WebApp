@@ -35,7 +35,8 @@ $(function () {
     <div class="uk-width-medium-3-4">
         <article class="uk-article">
             <h2 style="text-align: center;"><b>{{ blog.name }}</b></h2>
-            <p class="uk-article-meta">发表于{{ blog.create_at|datetime }}</p>
+            <p class="uk-article-meta" style="display: inline;">作者：{{ blog.user_name }} &nbsp;&nbsp;&nbsp;</p>  
+            <p class="uk-article-meta" style="display: inline;">发表于{{ blog.create_at|datetime }}</p> 
             <p>{{ blog.html_content|safe }}</p>
         </article>
 
