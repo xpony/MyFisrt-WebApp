@@ -45,7 +45,16 @@ create table comments(
 	primary key (id)
 ) engine=innodb default charset=utf8;
 
-
+create table photos(
+	id varchar(50) not null,
+	user_id varchar(50) not null,
+	user_name varchar(50) not null,
+	url varchar(500) not null,
+	name varchar(50) not null,
+	create_at real not null,
+	key idx_create_at (create_at),
+	primary key (id)
+) engine=innodb default charset=utf8;
 
 
 

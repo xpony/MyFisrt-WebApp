@@ -12,8 +12,8 @@ configs = {
 	'db': {
 		'host': '127.0.0.1',
 		'port': 3306,
-		'user': 'root',
-		'password': 'root123',
+		'user': 'root',  # 数据库登录名
+		'password': 'root123', # 数据库登录密码
 		'db': 'webapp'
 	},
 	'session': {

@@ -44,17 +44,25 @@ class Comment(Model):
 	content = TextField()
 	create_at = FloatField(default=time.time)
 
+class Photo(Model):
+	__table__ = 'photos'
+
+	id = StringField(primary_key=True, default=next_id, ddl='varchar(50)')
+	user_id = StringField(ddl='varchar(50)')
+	user_name = StringField(ddl='varchar(50')
+	url = StringField(ddl='varchar(500)')
+	name = StringField(ddl='varchar(50)')
+	create_at = FloatField(default=time.time)
 
 
 #####测试User信息插入数据库 ==> 成功插入！
 #####测试Blog信息插入数据库 ==> 成功插入！
-import orm
-import asyncio
+# import orm
+# import asyncio
 
 # async def test(loop):
 #     await orm.create_pool(loop, user='root', password='root123', db='webapp')
-#     summary = 'Lorem ipsum dolor sit amet hahahahahahahahahaha'
-#     b = Blog(name='Test Blog', user_id=113 , summary=summary,user_name='xpony', user_image='12', content='我爱你啊')
+#     b = Photo(name='Test', user_id=113 , user_name='xpony', url='https://raw.githubusercontent.com/xpony/Graph-bed/master/img/201909083333.jpg')
 #     # u = User(name='wowowowowo', email='xffasdfd@qqqq.com', passwd='fadfa123sdf', image='about:blank')
 #     await b.save()
 

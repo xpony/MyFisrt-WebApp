@@ -4,6 +4,13 @@
 
 {% block beforehead %}
 
+<link href="https://cdn.bootcss.com/highlight.js/9.6.0/styles/agate.min.css" rel="stylesheet"/>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//cdn.bootcss.com/highlightjs-line-numbers.js/1.1.0/highlightjs-line-numbers.min.js"></script>
+<script>hljs.initLineNumbersOnLoad();</script>
+
 <script>
 var comment_url = '/api/blogs/{{ blog.id }}/comments';
 $(function () {
@@ -36,8 +43,8 @@ $(function () {
         <article class="uk-article">
             <h2 style="text-align: center;"><b>{{ blog.name }}</b></h2>
             <p class="uk-article-meta" style="display: inline;">作者：{{ blog.user_name }} &nbsp;&nbsp;&nbsp;</p>  
-            <p class="uk-article-meta" style="display: inline;">发表于{{ blog.create_at|datetime }}</p> 
-            <p>{{ blog.html_content|safe }}</p>
+            <p class="uk-article-meta" style="display: inline;">发表于{{ blog.create_at|datetime }}</p>
+            <p >{{ blog.html_content|safe }}</p>
         </article>
 
         <hr class="uk-article-divider">
@@ -68,7 +75,7 @@ $(function () {
         {% if __user__ %}
             <h3><b>最新评论</b></h3>
         {% else %}
-            <h3><b>最新评论</b><span style="font-size: 15px; color: #a8b0a7"> (登录后即可发表评论吆)</span></h3>
+            <h3><b>最新评论</b><span style="font-size: 15px; color: #a8b0a7"> ( 登录后即可发表评论吆 )</span></h3>
         {% endif %}
         <ul class="uk-comment-list">
             {% for comment in comments %}
@@ -85,28 +92,29 @@ $(function () {
                 </article>
             </li>
             {% else %}
-            <p> 还没有人评论 ...</p>
+            <p style="font-size: 15px; color: #a8b0a7"> 还没有人评论 ...</p>
             {% endfor %}
         </ul>
 
     </div>
 
     <div class="uk-width-medium-1-4">
-        <div class="uk-panel uk-panel-box">
+        <div class="uk-panel uk-panel-box" style="box-shadow:0px 15px 10px -15px #000;" data-uk-sticky="{top:100}">
             <div class="uk-text-center">
                 <img class="uk-border-circle" width="120" height="120" src="{{ blog.user_image }}">
                 <h3>{{ blog.user_name }}</h3>
             </div>
+            <h4 style="text-align: center; margin-top: 10px; letter-spacing: 3.3px;"><b>作者</b></h4>
+            <div class="uk-panel uk-panel-header">
+                <h3 class="uk-panel-title">友情链接</h3>
+                <ul class="uk-list uk-list-line">
+                    <li><i class="uk-icon-link"></i> <a href="#">微博</a></li>
+                    <li><i class="uk-icon-link"></i> <a href="#">邮箱</a></li>
+                    <li><i class="uk-icon-link"></i> <a href="#">GitHub</a></li>
+                </ul>
+            </div>
         </div>
-        <h4 style="text-align: center; margin-top: 10px"><b>作者</b></h4>
-        <div class="uk-panel uk-panel-header">
-            <h3 class="uk-panel-title">友情链接</h3>
-            <ul class="uk-list uk-list-line">
-                <li><i class="uk-icon-link"></i> <a href="#">编程</a></li>
-                <li><i class="uk-icon-link"></i> <a href="#">思考</a></li>
-                <li><i class="uk-icon-link"></i> <a href="#">读书</a></li>
-            </ul>
-        </div>
+
     </div>
 
 {% endblock %}

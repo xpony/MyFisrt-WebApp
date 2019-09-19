@@ -433,6 +433,7 @@ $(function() {
     if (location.pathname === '/' || location.pathname.indexOf('/blog')===0) {
         $('li[data-url=blogs]').addClass('uk-active');
     }
+
 });
 
 function _display_error($obj, err) {

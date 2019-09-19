@@ -7,14 +7,14 @@ __author__ = 'xpony'
 
 import re, time, json, logging, hashlib, base64, asyncio
 from coroweb import get, post
-from models import User, Comment, Blog, next_id
+from models import User, Comment, Blog, Photo, next_id
 from aiohttp import web
 from apis import APIValueError, APIResourceNotFoundError, APIError, APIPermissionError
 from config import configs
-import markdown2
-from apis import Page, Page2
+import markdown2, markdown
+from apis import Page, Page2, Page3
 
-#设置cookie
+#设置cookie 
 COOKIE_NAME = 'xponysession'
 _COOKIE_KEY = configs.session.secret
 
@@ -82,7 +82,7 @@ async def cookie2user(cookie_str):
 @get('/') #首页
 async def index(*, page='1'): #路径上的参数是通过coroweb.py里的RequestHandler(）捕获之后传到url函数里的
 	page_index = get_page_index(page)
-	num = await Blog.findNumber('count(id)')
+	num = await Blog.findNumber('count(id)') #聚合查询，用id查询有多长条记录
 	page = Page(num, page_index=page_index) ##这里必须把新的page_index传进去！否则翻页功能有问题。
 	if num == 0:
 		blogs = []
@@ -212,7 +212,7 @@ async def manage_create_blog():
 		'action': '/api/blogs',
 	}
 
-#创建文章的api 文章信息提到到这里，通过这里来提交到数据库
+#创建文章的api 文章信息提交到这里，通过这里来提交到数据库
 @post('/api/blogs')
 async def api_create_blog(request, *, name, summary, content):
 	check_admin(request) #检查request对象身上是否绑定了user
@@ -252,7 +252,12 @@ async def get_blog(id):
 	comments = await Comment.findAll('blog_id=?', [id], orderBy='create_at desc')
 	for c in comments:
 		c.html_content = text2html(c.content)
-	blog.html_content = markdown2.markdown(blog.content)
+	blog.html_content = markdown.markdown(blog.content,
+											extensions=[
+			                                     'markdown.extensions.extra',
+			                                     'markdown.extensions.codehilite',
+			                                     'markdown.extensions.toc',
+			                    			])
 	return {
 		'__template__': 'blog.html',
 		'blog': blog,
@@ -339,4 +344,72 @@ async def api_delete_comment(request, *, id):
 	check_admin(request)
 	comment= await Comment.find(id)
 	await comment.remove()
+	return dict(id=id)
+
+#摄影作品展示页面
+@get('/photos')
+async def photos(*, page='1'):
+	page_index = get_page_index(page)
+	num = await Photo.findNumber('count(id)')
+	page = Page3(num, page_index=page_index) ##这里必须把新的page_index传进去！否则翻页功能有问题。
+	print(1111111111)
+	print(page.offset)
+	print(page.limit)
+	if num == 0:
+		photos = []
+	else:
+		photos = await Photo.findAll(orderBy='create_at desc', limit=(page.offset, page.limit))
+	return {
+		'__template__': 'photos.html',
+		'page': page,
+		'photos' : photos
+	}
+
+
+#添加照片的api，将一个照片的url添加到数据库
+@post('/api/photos')
+async def api_create_photo(request, *, name, url):
+	check_admin(request) #检查request对象身上是否绑定了user
+	if not name or not name.strip():
+		raise APIValueError('name', 'name cannot be empty.')
+	if not url or not url.strip():
+		raise APIValueError('url', 'summary cannot be empty')
+	photo = Photo(user_id=request.__user__.id, user_name=request.__user__.name, name=name.strip(), url=url.strip())
+	await photo.save()
+	return photo
+
+#添加照片页
+@get('/manage/photos/create')
+async def manage_create_photo():
+	return {
+		'__template__': 'manage_photo_create.html',
+		'id': '',
+		'action': '/api/photos',
+	}
+
+#照片管理页
+@get('/manage/photos')
+async def manage_photos(*, page='1'):
+    return {
+        '__template__': 'manage_photos.html',
+        'page_index': get_page_index(page)
+    }
+
+#照片信息获取api
+@get('/api/photos')
+async def api_get_photos(*, page='1'):
+    page_index = get_page_index(page)
+    num = await Photo.findNumber('count(id)')
+    p = Page2(num, page_index)
+    if num == 0: 
+        return dict(page=p, users=())
+    photos = await Photo.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, photos=photos)
+
+#删除某个照片
+@post('/api/photos/{id}/delete')
+async def api_delete_photo(request, *, id):
+	check_admin(request)
+	photo = await Photo.find(id)
+	await photo.remove()
 	return dict(id=id)
