@@ -1,7 +1,7 @@
-#编写一个创建表的SQL脚本  执行：用root登录mysql,然后执行 \. schema.sql 
+#初始化数据库表的SQL脚本  执行：用root用户登录mysql,然后执行 \. schema.sql 即可
 drop database if exists webapp;
 
-create database webapp;
+create database webapp;  ##创建的数据库名称
 
 use webapp;
 

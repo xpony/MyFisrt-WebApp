@@ -17,7 +17,7 @@ configs = {
 		'db': 'webapp'
 	},
 	'session': {
-		'secret': 'xpony'
+		'secret': 'xxxx'
 	}
 }
 
